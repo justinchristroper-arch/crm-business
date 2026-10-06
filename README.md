@@ -4,6 +4,30 @@ CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/
 
 **Status:** backend dan database PostgreSQL lokal tersedia. Deployment full-stack Neon/Vercel belum dilakukan karena proyek Neon belum dibuat. URL Sites sebelumnya adalah demo v1, bukan deployment backend v2. Ini proyek portfolio, bukan klaim enterprise security atau production readiness.
 
+## Ringkasan portfolio
+
+**Masalah bisnis:** studio web fiktif membutuhkan satu tempat untuk memantau calon klien, peluang penjualan, dan follow-up beberapa sales rep, dengan aturan akses dan riwayat perubahan yang konsisten.
+
+**Tech stack:** HTML/CSS/JavaScript ES modules, Python/FastAPI, SQLAlchemy, PostgreSQL, Alembic, Argon2id, JWT cookie, Node.js tests, pytest, ESLint, Ruff. Target hosting: frontend/API satu origin di Vercel, database Neon PostgreSQL.
+
+| Role | Cakupan |
+|---|---|
+| Sales Representative | Data milik sendiri atau ditugaskan kepadanya |
+| Sales Manager | Pipeline dan performa tim; perubahan outcome pihak lain wajib disertai alasan |
+| Admin | Pengguna, konfigurasi, dan data sistem; perubahan tetap diaudit |
+
+Sorotan teknis: konversi lead dalam satu transaksi; ownership/role diperiksa server; stage/value/owner changes tercatat dalam audit PostgreSQL; metrik Manager memakai definisi backend yang terdokumentasi.
+
+**Live demo v2:** belum tersedia. **Screenshot produksi:** belum diambil. Keduanya akan ditambahkan setelah deployment dan hosted acceptance verification berhasil; screenshot lokal/v1 tidak digunakan sebagai bukti produksi v2.
+
+```mermaid
+flowchart LR
+    Browser --> Vercel[Frontend + FastAPI di Vercel]
+    Vercel --> Neon[(Neon PostgreSQL)]
+```
+
+Diagram tersebut adalah target deployment; database yang sudah diverifikasi saat ini adalah PostgreSQL lokal.
+
 ## Jalankan lokal
 
 Prasyarat: Python 3.12+, Node.js 24+, PostgreSQL 17 atau Docker.
