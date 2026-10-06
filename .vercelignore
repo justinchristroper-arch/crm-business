@@ -1,0 +1,17 @@
+.env*
+!.env.example
+.venv
+node_modules
+artifacts
+.git
+.openai
+backend/tests
+tests
+docs
+compose.yaml
+server.mjs
+requirements-dev.txt
+requirements-dev.lock
+.pytest_cache
+.ruff_cache
+**/__pycache__

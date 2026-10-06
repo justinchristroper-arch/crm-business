@@ -1,6 +1,19 @@
 {
-  "name": "crm-business", "version": "1.0.0", "private": true,
-  "description": "A dependency-free CRM portfolio demo with browser-local storage.",
-  "scripts": {"dev": "node server.mjs", "start": "node server.mjs", "check": "node --check dist/app.js && node --check dist/model.js && node --test tests/model.test.mjs"},
-  "type": "module"
+  "name": "crm-business",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Multi-user CRM with FastAPI, PostgreSQL, and the original vanilla JavaScript interface.",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/dev.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "lint": "eslint dist tests scripts/*.mjs server.mjs eslint.config.js",
+    "check": "node --check dist/app.js && node --check dist/api.js && npm run lint && npm test"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0"
+  }
 }

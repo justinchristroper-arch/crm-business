@@ -3,5 +3,13 @@ node_modules/
 artifacts/
 *.tar.gz
 *.log
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.vercel/
+public/
+*.db
+*.db-*
 .env*
 !.env.example
