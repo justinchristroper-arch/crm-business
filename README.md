@@ -4,6 +4,10 @@ CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/
 
 **Status:** backend dan database PostgreSQL lokal tersedia. Deployment full-stack Neon/Vercel belum dilakukan karena proyek Neon belum dibuat. URL Sites sebelumnya adalah demo v1, bukan deployment backend v2. Ini proyek portfolio, bukan klaim enterprise security atau production readiness.
 
+**Source code publik:** [justinchristroper-arch/crm-business](https://github.com/justinchristroper-arch/crm-business), branch `main`. [CI quality gates](https://github.com/justinchristroper-arch/crm-business/actions) telah memverifikasi 29 test backend, 3 test frontend, lint, build aset, dan migrasi tanpa drift pada PostgreSQL disposable.
+
+**Publikasi Phase 3:** proyek Vercel Hobby `justin-c/crm-business` sudah dibuat dan GitHub terhubung. Provisioning Neon Free menunggu pemilik akun menerima syarat Marketplace/Neon. Belum ada deployment, migration/seed Neon, hosted acceptance verification, atau screenshot produksi. Lihat [status Phase 3](docs/PHASE3.md).
+
 ## Ringkasan portfolio
 
 **Masalah bisnis:** studio web fiktif membutuhkan satu tempat untuk memantau calon klien, peluang penjualan, dan follow-up beberapa sales rep, dengan aturan akses dan riwayat perubahan yang konsisten.

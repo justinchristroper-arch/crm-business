@@ -15,9 +15,17 @@ Starting verified code: 17fd83d9e633fd05db852e6a6581ee6b434ca9e4 on codex/full-s
 
 ## Deployment state
 
-Neon plugin is available but not installed/connected at preflight. A suggestion was made to allow the user to install/connect it. No Neon production database has been provisioned yet. This is an authentication/provisioning dependency, not a completed deployment.
+Public repository: https://github.com/justinchristroper-arch/crm-business. Default public branch: main. codex/full-stack-crm was fast-forward merged from the original master base, retaining all commits. origin/main was pushed and synchronized.
 
-Vercel CLI authentication is being checked. Full-stack production URL, migrations/seed against Neon, hosted acceptance flows, and production screenshots are pending. The existing Sites v1 and localhost previews are not production evidence for v2.
+GitHub CI run https://github.com/justinchristroper-arch/crm-business/actions/runs/37479537207 succeeded on f108de37a180e3239d48af7c4f967237c2e6cf42: 29 PostgreSQL backend tests, 3 frontend tests, ESLint, Ruff, asset build, pip check, Alembic head 0002_audit_immutability, no schema drift. CI database was disposable PostgreSQL, not Neon. One Starlette/httpx TestClient deprecation warning remains.
+
+Vercel CLI authenticated; scope justin-c (JustinC) verified as Hobby. Project justin-c/crm-business created, FastAPI detected, GitHub repository connected. Generated .vercel and .env.local are ignored. Deployment list returned no deployments.
+
+Neon provisioning was attempted through Vercel Marketplace with explicit verified Free plan free_v3, region sin1, built-in Neon Auth disabled, environment production. The CLI returned action_required / integration_terms_acceptance_required. No production database was created, and no paid plan was activated.
+
+**Required owner action:** review and accept terms at https://vercel.com/justin-c/~/integrations/accept-terms/neon?source=cli, then tell the agent to resume. The CLI requests personal browser/dashboard completion; the agent did not accept legal terms on the user's behalf.
+
+Once confirmed, retry the same provisioning command (first reconcile whether a resource has already appeared, to avoid duplicates), retrieve env variables privately, run migrations/seed explicitly, configure secure production env/origins, deploy, and complete hosted acceptance/responsive/screenshot checks. Full-stack production URL, Neon migration/seed, hosted flows, and screenshots are still pending. Existing Sites v1 and localhost are not production evidence for v2.
 
 ## Acceptance record policy
 
