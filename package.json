@@ -1,0 +1,6 @@
+{
+  "name": "crm-business", "version": "1.0.0", "private": true,
+  "description": "A dependency-free CRM portfolio demo with browser-local storage.",
+  "scripts": {"dev": "node server.mjs", "start": "node server.mjs", "check": "node --check dist/app.js && node --check dist/model.js && node --test tests/model.test.mjs"},
+  "type": "module"
+}
