@@ -2,17 +2,17 @@
 
 CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/Lost**. Tampilan HTML/CSS/JavaScript asli dipertahankan; data dan business rules kini memakai FastAPI, PostgreSQL, SQLAlchemy, serta Alembic. Tidak ada AI, pembayaran, invoicing, WhatsApp, atau email automation.
 
-**Status:** backend dan database PostgreSQL lokal tersedia. Deployment full-stack Neon/Vercel belum dilakukan karena proyek Neon belum dibuat. URL Sites sebelumnya adalah demo v1, bukan deployment backend v2. Ini proyek portfolio, bukan klaim enterprise security atau production readiness.
+**Live demo:** [crm-business-sigma.vercel.app](https://crm-business-sigma.vercel.app) · **Source:** [GitHub](https://github.com/justinchristroper-arch/crm-business). Frontend dan FastAPI berjalan di Vercel; data bersama disimpan di Neon PostgreSQL. Ini proyek portfolio dengan data fiktif, bukan klaim enterprise security atau production readiness.
 
 **Source code publik:** [justinchristroper-arch/crm-business](https://github.com/justinchristroper-arch/crm-business), branch `main`. [CI quality gates](https://github.com/justinchristroper-arch/crm-business/actions) telah memverifikasi 29 test backend, 3 test frontend, lint, build aset, dan migrasi tanpa drift pada PostgreSQL disposable.
 
-**Publikasi Phase 3:** proyek Vercel Hobby `justin-c/crm-business` sudah dibuat dan GitHub terhubung. Provisioning Neon Free menunggu pemilik akun menerima syarat Marketplace/Neon. Belum ada deployment, migration/seed Neon, hosted acceptance verification, atau screenshot produksi. Lihat [status Phase 3](docs/PHASE3.md).
+**Verifikasi hosted:** 131 pemeriksaan API pada demo publik lulus, meliputi autentikasi, hak akses, konversi lead, task, Won/Lost/reopen, audit, persistensi, dan perhitungan analitik. Tampilan diperiksa pada lebar 1440, 1280, 768, dan 390 px. Lihat [bukti verifikasi](docs/VERIFICATION.md), [screenshot asli](docs/screenshots/README.md), dan [konten siap portfolio](docs/PORTFOLIO-HANDOFF.md).
 
 ## Ringkasan portfolio
 
 **Masalah bisnis:** studio web fiktif membutuhkan satu tempat untuk memantau calon klien, peluang penjualan, dan follow-up beberapa sales rep, dengan aturan akses dan riwayat perubahan yang konsisten.
 
-**Tech stack:** HTML/CSS/JavaScript ES modules, Python/FastAPI, SQLAlchemy, PostgreSQL, Alembic, Argon2id, JWT cookie, Node.js tests, pytest, ESLint, Ruff. Target hosting: frontend/API satu origin di Vercel, database Neon PostgreSQL.
+**Tech stack:** HTML/CSS/JavaScript ES modules, Python/FastAPI, SQLAlchemy, PostgreSQL, Alembic, Argon2id, JWT cookie, Node.js tests, pytest, ESLint, Ruff. Hosting: frontend/API satu origin di Vercel Hobby, database Neon Free di region Singapore.
 
 | Role | Cakupan |
 |---|---|
@@ -22,7 +22,9 @@ CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/
 
 Sorotan teknis: konversi lead dalam satu transaksi; ownership/role diperiksa server; stage/value/owner changes tercatat dalam audit PostgreSQL; metrik Manager memakai definisi backend yang terdokumentasi.
 
-**Live demo v2:** belum tersedia. **Screenshot produksi:** belum diambil. Keduanya akan ditambahkan setelah deployment dan hosted acceptance verification berhasil; screenshot lokal/v1 tidak digunakan sebagai bukti produksi v2.
+![Manager dashboard pada demo publik](docs/screenshots/manager-dashboard.png)
+
+[Leads](docs/screenshots/leads-desktop.png) · [Pipeline/Kanban](docs/screenshots/pipeline-desktop.png) · [Audit detail](docs/screenshots/audit-detail.png) · [Manager analytics](docs/screenshots/manager-analytics-full.png) · [Mobile](docs/screenshots/tasks-mobile.png). Semua gambar adalah tangkapan browser dari deployment publik menggunakan data fiktif.
 
 ```mermaid
 flowchart LR
@@ -30,11 +32,11 @@ flowchart LR
     Vercel --> Neon[(Neon PostgreSQL)]
 ```
 
-Diagram tersebut adalah target deployment; database yang sudah diverifikasi saat ini adalah PostgreSQL lokal.
+Arsitektur ini sudah digunakan demo publik. Browser memanggil REST API internal aplikasi; tidak ada API AI atau API pihak ketiga berbayar.
 
 ## Jalankan lokal
 
-Prasyarat: Python 3.12+, Node.js 24+, PostgreSQL 17 atau Docker.
+Prasyarat: Python 3.12, Node.js 24+, PostgreSQL 17 atau Docker.
 
 ```sh
 python -m venv .venv
@@ -101,7 +103,7 @@ python scripts/build.py
 pip check
 ```
 
-Backend tests menggunakan PostgreSQL sebenarnya. Frontend check = syntax, ESLint, API adapter tests. Build lokal menyiapkan `public/` untuk Vercel CDN; bukan bukti deployment Vercel terverifikasi. CI memakai PostgreSQL disposable.
+Backend tests menggunakan PostgreSQL sebenarnya. Frontend check = syntax, ESLint, API adapter tests. Build lokal menyiapkan `public/` untuk Vercel CDN. CI memakai PostgreSQL disposable; pemeriksaan hosted dilakukan terpisah terhadap deployment Vercel dan database Neon.
 
 ## Struktur
 
@@ -128,6 +130,10 @@ Frontend tidak lagi membaca/menulis localStorage untuk data CRM/token. Data brow
 
 Ikuti [Neon Free + Vercel](docs/DEPLOYMENT.md). Target nol biaya untuk trafik portfolio rendah, dengan kuota/ketentuan provider tetap berlaku. Tidak ada API/paket berbayar yang diaktifkan.
 
-Setelah URL publik/repo GitHub tersedia, pasang tombol **Live Demo** dan **Source Code** pada website portfolio. Repo GitHub belum dibuat; branch/commit tersedia lokal. Jangan deploy dist saja ke GitHub Pages karena v2 membutuhkan API. Workflow Pages v1 diganti CI agar tidak menerbitkan frontend yang kehilangan backend.
+Pasang tombol **Live Demo** dan **Source Code** pada website portfolio menggunakan [konten dan link siap pakai](docs/PORTFOLIO-HANDOFF.md). Website portfolio terpisah belum diubah. Jangan deploy dist saja ke GitHub Pages karena v2 membutuhkan API. Workflow Pages v1 diganti CI agar tidak menerbitkan frontend yang kehilangan backend.
+
+## Batasan demo
+
+Akun dan data fiktif digunakan bersama; pengunjung Admin dapat mengubah data demo. Reset publik dinonaktifkan. Cold start dan kuota Free/Hobby berlaku. Tidak ada MFA, pemulihan password melalui email, SSO, isolasi organisasi multi-tenant, pagination, load test, atau klaim SLA. Audit melindungi perubahan melalui aplikasi; pemilik database masih dapat mengubah proteksinya. Angka dashboard dan data demo dapat berubah ketika pengunjung mencoba aplikasi. Rincian ada di [security/testing](docs/SECURITY-TESTING.md).
 
 Baca [spesifikasi/ERD/analitik](docs/SPEC.md), [keamanan/pengujian](docs/SECURITY-TESTING.md), [case study](docs/CASE-STUDY.md), dan [hasil verifikasi](docs/VERIFICATION.md).

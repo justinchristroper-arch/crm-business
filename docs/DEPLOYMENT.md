@@ -2,7 +2,9 @@
 
 ## Status/cost
 
-Full-stack v2 is implemented locally; no Neon resource/v2 public URL is claimed. Existing Sites URL remains v1. Sites' Worker runtime does not run this requested Python backend.
+Full-stack v2 is live at **https://crm-business-sigma.vercel.app**, backed by Neon PostgreSQL. Public source: https://github.com/justinchristroper-arch/crm-business (`main`). Vercel project `justin-c/crm-business` uses Hobby; the Marketplace database `crm-business-db` uses Neon Free (`free_v3`), region `sin1`, with Neon Auth disabled. The original Sites v1 is superseded by this deployment.
+
+The owner accepted integration terms before provisioning. Alembic migrations and explicit synthetic seed completed successfully; schema revision is `0002_audit_immutability`. Runtime uses pooled SSL connections, migrations use the direct SSL connection. Production JWT secret and database credentials remain in ignored env files/provider configuration. This guide also describes how to reproduce the setup; no additional project is needed for the existing demo.
 
 Target zero cost for low personal/noncommercial portfolio traffic, within provider quotas. Do not activate paid plans/integrations or buy a domain. Check Free/Hobby labels before provisioning. Sources: [Vercel Hobby](https://vercel.com/docs/plans/hobby), [Neon plans](https://neon.com/docs/introduction/plans), [FastAPI support](https://vercel.com/docs/frameworks/backend/fastapi), [Neon pooling](https://neon.com/docs/connect/connection-pooling).
 
@@ -24,7 +26,7 @@ For stronger deployments, use separate restricted application and schema-migrati
 | JWT_SECRET | Unique random secret, at least 32 characters |
 | APP_ENV | production |
 | COOKIE_SECURE | true |
-| ALLOWED_ORIGINS | JSON array of exact HTTPS origins, e.g. ["https://your-project.vercel.app"] |
+| ALLOWED_ORIGINS | ["https://crm-business-sigma.vercel.app"] for the existing demo |
 | DEMO_MODE | true for synthetic portfolio accounts |
 | ENABLE_DEMO_RESET | false recommended |
 | REPORT_TIMEZONE | Asia/Jakarta |
@@ -60,9 +62,9 @@ DEMO_MODE=true is needed for synthetic seed. Do not migrate from several instanc
 
 ## 4. Vercel Hobby
 
-1. Push this local branch to your GitHub repo (none was created automatically).
+1. Push `main` to your GitHub repository. The existing public repository is already connected to Vercel.
 2. Import repo on **Hobby**, framework **FastAPI**, root at repo root, Python 3.12 or supported compatible version.
-3. Entry point is backend.main:app in pyproject.toml. Build command `python scripts/build.py` copies dist assets to public for CDN. requirements.txt supplies Python dependencies.
+3. Entry point is backend.main:app in pyproject.toml. Build command `python scripts/build.py` copies dist assets to public for CDN. The Vercel uv builder uses the Python 3.12 project dependencies in pyproject.toml and committed uv.lock; requirements.txt also pins runtime dependencies for pip/local/CI.
 4. Do not configure the project as a dist-only static deployment.
 5. Set env vars and actual stable production origin before testing login.
 6. Verify successful Vercel build, /api/health, login and complete CRM flow. Local asset build is not proof of a successful hosted deployment.
@@ -75,11 +77,11 @@ Test Rep create/convert/close/reopen/audit, other Rep private-data denial, Manag
 
 ## Portfolio links
 
-After verifying real URLs, add to your existing portfolio project card:
+Use these verified URLs on your existing portfolio project card:
 
 ```html
-<a href="https://YOUR-VERIFIED-CRM.vercel.app" target="_blank" rel="noopener noreferrer">Live Demo</a>
-<a href="https://github.com/YOUR-USERNAME/CRM-Business" target="_blank" rel="noopener noreferrer">Source Code</a>
+<a href="https://crm-business-sigma.vercel.app" target="_blank" rel="noopener noreferrer">Live Demo</a>
+<a href="https://github.com/justinchristroper-arch/crm-business" target="_blank" rel="noopener noreferrer">Source Code</a>
 ```
 
-Placeholders are not actual URLs. Linking is supported; iframe embedding is intentionally blocked by frame protection. This task does not modify your existing portfolio website.
+Linking is supported; iframe embedding is intentionally blocked by frame protection. This task does not modify your existing portfolio website. See [portfolio handoff](PORTFOLIO-HANDOFF.md) for card text, resume bullets, and the recommended screenshot.
