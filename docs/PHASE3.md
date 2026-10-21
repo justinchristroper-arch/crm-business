@@ -1,5 +1,7 @@
 # Phase 3: public portfolio publication
 
+This records the initial publication. For the subsequent audit fixes, current schema `0003_lead_details`, runtime privilege separation and latest test results, see [hardening verification](HARDENING-VERIFICATION.md).
+
 Initial work: 6 October 2026. Finalization: 21 October 2026 (Asia/Jakarta).
 Starting verified code: 17fd83d9e633fd05db852e6a6581ee6b434ca9e4 on codex/full-stack-crm.
 
