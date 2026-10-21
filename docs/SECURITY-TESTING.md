@@ -11,14 +11,14 @@ Argon2id hashes; HS256 JWT with issuer/audience/expiry; DB session revocation; H
 - Throttling uses ASGI client IP, without trusting arbitrary forwarded headers; proxies can make users share apparent IP.
 - Team strings/one assignee; no multi-tenant organization layer or complex ACLs.
 - Duplicate constraints are owner-scoped for privacy, not global customer identity resolution.
-- DB owner can override trigger/TRUNCATE; audit is not a cryptographic external ledger. Use restricted runtime DB permissions.
+- A separate least-privilege runtime SQL role now has no audit UPDATE/DELETE/TRUNCATE or schema ownership/CREATE. Offline migration owners can still override protections; audit is not a cryptographic external ledger.
 - READ COMMITTED UI snapshots can span concurrent commits. Revision guards writes, not snapshot consistency.
-- Scoped collections are returned for low data volumes; no cursor pagination/load testing. Metrics aggregate in Python; serialization may do multiple ORM reads. Large datasets need SQL aggregation, eager loading, and pagination.
+- UI collections use server search/filter/offset pagination with stable ordering, max 100 rows/request, batched company lookup, scoped SQL metrics, and related lookups. No large-scale load test or cursor pagination is claimed. Explicit JSON export still materializes visible data and is intended for low demo volumes.
 - UI app.js remains large; future growth should split page/form modules.
 - Import is data migration with new IDs/timestamps/ownership, not exact restore; audit actors cannot be forged from backup.
 - Provider storage/DB permissions protect secrets at rest; no app-level field encryption. Demo must use fictitious data only.
-- Explicit migrations/seed; Neon operational backup/restore drills not verified.
-- Browser checks are tool-assisted, not automated cross-browser E2E, penetration testing, or load testing.
+- Explicit migrations/seed; offline pg_dump/checksum and guarded local restore-drill tooling are provided. Backup schedules/offsite retention and production recovery objectives still require an operational decision. See FREE-HARDENING.md and its verification record.
+- Two automated Chromium E2E flows now run locally/CI in addition to tool-assisted hosted checks; these do not constitute exhaustive cross-browser E2E, penetration testing, or load testing.
 - Swagger uses CDN script/style only on /api/docs; normal app scripts are restricted to self.
 - Disposable Windows cluster is loopback-only trust auth, never a production database configuration.
 

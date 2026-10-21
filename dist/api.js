@@ -20,7 +20,7 @@ export function recordPayload(kind, value){
   let result;
   if(kind==='contacts')result={name:value.name,company:value.company,email:value.email||'',phone:value.phone||'',role:value.role||''};
   if(kind==='companies')result={name:value.name};
-  if(kind==='leads')result={name:value.name,company:value.company,email:value.email||'',source:value.source,status:value.status,notes:value.notes||''};
+  if(kind==='leads')result={name:value.name,company:value.company,email:value.email||'',phone:value.phone||'',role:value.role||'',source:value.source,status:value.status,notes:value.notes||''};
   if(kind==='deals')result={title:value.title,contact_id:value.contact||value.contact_id,value:String(value.value),stage:stageCode(value.stage),due:value.due,notes:value.notes||'',closing_reason:value.closing_reason||'',change_reason:value.change_reason||''};
   if(kind==='tasks')result={title:value.title,contact_id:value.contact||value.contact_id||null,lead_id:value.lead_id||null,opportunity_id:value.opportunity_id||null,date:value.date,priority:value.priority,done:!!value.done};
   if(value.owner_id)result.owner_id=value.owner_id;

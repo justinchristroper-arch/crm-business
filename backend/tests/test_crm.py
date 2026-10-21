@@ -330,9 +330,11 @@ def test_conversion_rolls_back_when_late_audit_write_fails(clients, db, monkeypa
             raise RuntimeError('Injected transactional failure')
         return original(*args, **kwargs)
     monkeypatch.setattr(services, 'audit', failing_audit)
-    with pytest.raises(RuntimeError, match='Injected'):
-        client.post(f"/api/leads/{record['id']}/convert", json={
-            'revision': 1, 'title': 'Rollback', 'value': 5000, 'due': today().isoformat()})
+    response = client.post(f"/api/leads/{record['id']}/convert", json={
+        'revision': 1, 'title': 'Rollback', 'value': 5000, 'due': today().isoformat()})
+    assert response.status_code == 500
+    assert 'Injected' not in response.text and 'Traceback' not in response.text
+    assert response.json()['request_id'] == response.headers['X-Request-ID']
     assert db.scalar(select(func.count()).select_from(Contact)) == 0
     assert db.scalar(select(func.count()).select_from(Company)) == 0
     assert db.scalar(select(func.count()).select_from(Opportunity)) == 0
