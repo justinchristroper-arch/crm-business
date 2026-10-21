@@ -1,0 +1,194 @@
+{
+  "url": "https://crm-business-sigma.vercel.app",
+  "date": "2026-10-21T23:14:12.170045+07:00",
+  "tested_code": "c5d599563d24ea1227abbfcf09dd27b957588a1c",
+  "checks": [
+    {
+      "check": "POST /auth/login",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /auth/login",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /auth/login",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /leads",
+      "expected_status": 201,
+      "passed": true
+    },
+    {
+      "check": "POST /leads/3ad26f28-8f6c-4b88-a7e8-d7775ad2658d/convert",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "GET /contacts/721567d6-5659-4400-9d41-c1b5f1ca0424",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "Lead details persisted through conversion",
+      "passed": true
+    },
+    {
+      "check": "GET /opportunities/d75dc117-1344-443c-89be-88ca4df597f9",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/stage",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/stage",
+      "expected_status": 422,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/stage",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "GET /activities",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "Same-stage reason change has before/after audit",
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/stage",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/owner",
+      "expected_status": 422,
+      "passed": true
+    },
+    {
+      "check": "GET /companies/c7b8c18b-6f10-4eb0-affe-a6e11632d0af",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /companies/c7b8c18b-6f10-4eb0-affe-a6e11632d0af/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /contacts/721567d6-5659-4400-9d41-c1b5f1ca0424/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /tasks",
+      "expected_status": 201,
+      "passed": true
+    },
+    {
+      "check": "POST /tasks/a63aad03-c30c-4a57-9399-e68be721a91e/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "PUT /tasks/a63aad03-c30c-4a57-9399-e68be721a91e?revision=2",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /companies/c7b8c18b-6f10-4eb0-affe-a6e11632d0af/owner",
+      "expected_status": 409,
+      "passed": true
+    },
+    {
+      "check": "POST /contacts/721567d6-5659-4400-9d41-c1b5f1ca0424/owner",
+      "expected_status": 409,
+      "passed": true
+    },
+    {
+      "check": "GET /opportunities/d75dc117-1344-443c-89be-88ca4df597f9",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "PUT /opportunities/d75dc117-1344-443c-89be-88ca4df597f9?revision=5",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /tasks/a63aad03-c30c-4a57-9399-e68be721a91e/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /opportunities/d75dc117-1344-443c-89be-88ca4df597f9/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /contacts/721567d6-5659-4400-9d41-c1b5f1ca0424/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /companies/c7b8c18b-6f10-4eb0-affe-a6e11632d0af/owner",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "GET /opportunities/d75dc117-1344-443c-89be-88ca4df597f9",
+      "expected_status": 404,
+      "passed": true
+    },
+    {
+      "check": "GET /contacts/721567d6-5659-4400-9d41-c1b5f1ca0424",
+      "expected_status": 404,
+      "passed": true
+    },
+    {
+      "check": "GET /opportunities/page?limit=1&q=f177bea",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "GET /workspace?view=opportunities&limit=1",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "Scoped pagination does not truncate dashboard totals",
+      "passed": true
+    },
+    {
+      "check": "POST /auth/logout",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /auth/logout",
+      "expected_status": 200,
+      "passed": true
+    },
+    {
+      "check": "POST /auth/logout",
+      "expected_status": 200,
+      "passed": true
+    }
+  ]
+}

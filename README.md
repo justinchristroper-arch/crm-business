@@ -4,9 +4,9 @@ CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/
 
 **Live demo:** [crm-business-sigma.vercel.app](https://crm-business-sigma.vercel.app) · **Source:** [GitHub](https://github.com/justinchristroper-arch/crm-business). Frontend dan FastAPI berjalan di Vercel; data bersama disimpan di Neon PostgreSQL. Ini proyek portfolio dengan data fiktif, bukan klaim enterprise security atau production readiness.
 
-**Source code publik:** [justinchristroper-arch/crm-business](https://github.com/justinchristroper-arch/crm-business), branch `main`. [CI quality gates](https://github.com/justinchristroper-arch/crm-business/actions) telah memverifikasi 29 test backend, 3 test frontend, lint, build aset, dan migrasi tanpa drift pada PostgreSQL disposable.
+**Source code publik:** [justinchristroper-arch/crm-business](https://github.com/justinchristroper-arch/crm-business), branch `main`. [CI quality gates](https://github.com/justinchristroper-arch/crm-business/actions) telah memverifikasi 42 test backend, 3 test frontend, 2 test browser, lint, build aset, pemeriksaan advisory dependensi, dan migrasi tanpa drift pada PostgreSQL disposable.
 
-**Verifikasi hosted:** 131 pemeriksaan API pada demo publik lulus, meliputi autentikasi, hak akses, konversi lead, task, Won/Lost/reopen, audit, persistensi, dan perhitungan analitik. Tampilan diperiksa pada lebar 1440, 1280, 768, dan 390 px. Lihat [bukti verifikasi](docs/VERIFICATION.md), [screenshot asli](docs/screenshots/README.md), dan [konten siap portfolio](docs/PORTFOLIO-HANDOFF.md).
+**Verifikasi hosted terbaru:** 135 pemeriksaan alur utama dan 38 pemeriksaan regresi perbaikan audit lulus pada demo publik. Meliputi autentikasi, hak akses, detail/konversi lead, assignment, task, Won/Lost/reopen, audit, persistensi, pagination, dan analitik. Lihat [hasil perbaikan terbaru](docs/HARDENING-VERIFICATION.md), [bukti awal/responsive](docs/VERIFICATION.md), [screenshot asli](docs/screenshots/README.md), dan [konten siap portfolio](docs/PORTFOLIO-HANDOFF.md).
 
 **Perbaikan audit:** riwayat perubahan alasan penutupan, konsistensi assignment, detail Lead, role database berizin minimum, agregasi SQL, pagination/pencarian server, request ID/logging, pembatasan sesi, dan tes browser otomatis. Baca [perbaikan gratis dan prosedur operasi](docs/FREE-HARDENING.md) untuk detail serta batasannya.
 

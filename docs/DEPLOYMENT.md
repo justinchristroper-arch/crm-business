@@ -4,7 +4,7 @@
 
 Full-stack v2 is live at **https://crm-business-sigma.vercel.app**, backed by Neon PostgreSQL. Public source: https://github.com/justinchristroper-arch/crm-business (`main`). Vercel project `justin-c/crm-business` uses Hobby; the Marketplace database `crm-business-db` uses Neon Free (`free_v3`), region `sin1`, with Neon Auth disabled. The original Sites v1 is superseded by this deployment.
 
-The owner accepted integration terms before provisioning. Alembic migrations and explicit synthetic seed completed successfully; schema revision is `0002_audit_immutability`. Runtime uses pooled SSL connections, migrations use the direct SSL connection. Production JWT secret and database credentials remain in ignored env files/provider configuration. This guide also describes how to reproduce the setup; no additional project is needed for the existing demo.
+The owner accepted integration terms before provisioning. Alembic migrations and explicit synthetic seed completed successfully; current schema revision is `0003_lead_details`. Runtime uses a restricted SQL role through pooled SSL connections; migrations use the separate offline owner role/direct SSL connection. Production JWT secret and database credentials remain in ignored env files/provider configuration. This guide also describes how to reproduce the setup; no additional project is needed for the existing demo.
 
 Target zero cost for low personal/noncommercial portfolio traffic, within provider quotas. Do not activate paid plans/integrations or buy a domain. Check Free/Hobby labels before provisioning. Sources: [Vercel Hobby](https://vercel.com/docs/plans/hobby), [Neon plans](https://neon.com/docs/introduction/plans), [FastAPI support](https://vercel.com/docs/frameworks/backend/fastapi), [Neon pooling](https://neon.com/docs/connect/connection-pooling).
 
@@ -16,7 +16,7 @@ Target zero cost for low personal/noncommercial portfolio traffic, within provid
 4. `DATABASE_URL` = pooled; `MIGRATION_DATABASE_URL` = direct. Preserve SSL parameters such as sslmode=require. postgresql:// and postgresql+psycopg:// are accepted.
 5. Use a separate branch/database for preview/testing; TEST_DATABASE_URL must be disposable and end `_test`.
 
-For stronger deployments, use separate restricted application and schema-migration DB roles. Application role should not own schema/triggers or have TRUNCATE permissions. Roles are not provisioned automatically.
+The current demo already uses separate restricted application and schema-migration DB roles. The application role has no schema ownership/CREATE or audit UPDATE/DELETE/TRUNCATE. For a new environment, provision it explicitly with `python -m scripts.runtime_role` as described in [free hardening operations](FREE-HARDENING.md); it never runs automatically during startup/build.
 
 ## 2. Vercel env
 

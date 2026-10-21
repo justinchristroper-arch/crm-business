@@ -1,0 +1,790 @@
+{
+  "url": "https://crm-business-sigma.vercel.app",
+  "date": "2026-10-21T23:13:53.590367+07:00",
+  "checks": [
+    {
+      "check": "GET /health -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /workspace -> 401",
+      "passed": true,
+      "detail": {
+        "actual_status": 401
+      }
+    },
+    {
+      "check": "POST /auth/login -> 401",
+      "passed": true,
+      "detail": {
+        "actual_status": 401
+      }
+    },
+    {
+      "check": "Login rep@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "HTTPS session cookie rep@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Login rep2@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "HTTPS session cookie rep2@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Login manager@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "HTTPS session cookie manager@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Login admin@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "HTTPS session cookie admin@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /auth/me -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /auth/me -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /auth/me -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /workspace?days=30 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Sales initial pipeline",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial won",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial win rate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial conversion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial overdue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial at risk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial stage Baru",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial stage Kualifikasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial stage Proposal",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial stage Negosiasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales initial sales cycle",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /workspace?days=30 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Manager initial pipeline",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial won",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial win rate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial conversion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial overdue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial at risk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial stage Baru",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial stage Kualifikasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial stage Proposal",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial stage Negosiasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep pipeline Dimas Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep won Dimas Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep pipeline Hosted QA User 530bb8b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep won Hosted QA User 530bb8b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep pipeline Hosted QA User 6d8aa42",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep won Hosted QA User 6d8aa42",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep pipeline Sarah Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial rep won Sarah Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager initial sales cycle",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /leads -> 201",
+      "passed": true,
+      "detail": {
+        "actual_status": 201
+      }
+    },
+    {
+      "check": "PUT /leads/760b8b7a-d3c6-4ba4-a440-dec07df5486b?revision=1 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /leads/760b8b7a-d3c6-4ba4-a440-dec07df5486b/convert -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /contacts/7d893262-0762-49b4-8c35-8da7c8230312 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /companies/3ec56d11-db9c-4768-a228-386ac008d743 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Conversion company/contact resolution",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /tasks -> 201",
+      "passed": true,
+      "detail": {
+        "actual_status": 201
+      }
+    },
+    {
+      "check": "New task overdue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "PUT /tasks/2b2ab482-7ebb-4397-bade-6dd5099c269a?revision=1 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Task complete/reopen True",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "PUT /tasks/2b2ab482-7ebb-4397-bade-6dd5099c269a?revision=2 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Task complete/reopen False",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "PUT /tasks/2b2ab482-7ebb-4397-bade-6dd5099c269a?revision=3 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Task complete/reopen True",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Won closes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 422",
+      "passed": true,
+      "detail": {
+        "actual_status": 422
+      }
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Lost reason retained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Reopen clears closure",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "PUT /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032?revision=7 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /opportunities -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /opportunities/1ee4f9b3-b041-4d1b-9695-34ef4a7e0e77 -> 404",
+      "passed": true,
+      "detail": {
+        "actual_status": 404
+      }
+    },
+    {
+      "check": "POST /opportunities/1ee4f9b3-b041-4d1b-9695-34ef4a7e0e77/stage -> 404",
+      "passed": true,
+      "detail": {
+        "actual_status": 404
+      }
+    },
+    {
+      "check": "GET /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032 -> 404",
+      "passed": true,
+      "detail": {
+        "actual_status": 404
+      }
+    },
+    {
+      "check": "POST /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032/stage -> 422",
+      "passed": true,
+      "detail": {
+        "actual_status": 422
+      }
+    },
+    {
+      "check": "GET /opportunities -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Manager team visibility",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /leads -> 201",
+      "passed": true,
+      "detail": {
+        "actual_status": 201
+      }
+    },
+    {
+      "check": "POST /leads/fe761079-93e1-45a5-a1ae-49624a9ac968/owner -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /leads/fe761079-93e1-45a5-a1ae-49624a9ac968 -> 404",
+      "passed": true,
+      "detail": {
+        "actual_status": 404
+      }
+    },
+    {
+      "check": "GET /leads/fe761079-93e1-45a5-a1ae-49624a9ac968 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /activities -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /activities -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Audit business actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Audit owner changes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "DELETE /activities/cb3c41cc-9b54-4caf-af3d-3bd03eb5c5cd -> 405",
+      "passed": true,
+      "detail": {
+        "actual_status": 405
+      }
+    },
+    {
+      "check": "PUT /activities/cb3c41cc-9b54-4caf-af3d-3bd03eb5c5cd -> 405",
+      "passed": true,
+      "detail": {
+        "actual_status": 405
+      }
+    },
+    {
+      "check": "POST /users -> 403",
+      "passed": true,
+      "detail": {
+        "actual_status": 403
+      }
+    },
+    {
+      "check": "POST /users -> 201",
+      "passed": true,
+      "detail": {
+        "actual_status": 201
+      }
+    },
+    {
+      "check": "PATCH /users/c5277772-0d24-4ea9-9e7e-f3371296657a -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Login rep@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "HTTPS session cookie rep@crm-demo.example",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /opportunities/3f807a9f-42b4-4435-811c-bfb900e5d032 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Second session persistence",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /workspace?days=30 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Sales final pipeline",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final won",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final win rate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final conversion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final overdue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final at risk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final stage Baru",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final stage Kualifikasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final stage Proposal",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final stage Negosiasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Sales final sales cycle",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "GET /workspace?days=30 -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "Manager final pipeline",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final won",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final win rate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final conversion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final overdue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final at risk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final stage Baru",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final stage Kualifikasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final stage Proposal",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final stage Negosiasi",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep pipeline Dimas Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep won Dimas Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep pipeline Hosted QA User 530bb8b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep won Hosted QA User 530bb8b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep pipeline Hosted QA User 562c60b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep won Hosted QA User 562c60b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep pipeline Hosted QA User 6d8aa42",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep won Hosted QA User 6d8aa42",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep pipeline Sarah Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final rep won Sarah Sales",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Manager final sales cycle",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "POST /auth/logout -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /auth/logout -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /auth/logout -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /auth/logout -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "POST /auth/logout -> 200",
+      "passed": true,
+      "detail": {
+        "actual_status": 200
+      }
+    },
+    {
+      "check": "GET /auth/me -> 401",
+      "passed": true,
+      "detail": {
+        "actual_status": 401
+      }
+    }
+  ],
+  "synthetic_ids": {
+    "lead": "760b8b7a-d3c6-4ba4-a440-dec07df5486b",
+    "contact_id": "7d893262-0762-49b4-8c35-8da7c8230312",
+    "company_id": "3ec56d11-db9c-4768-a228-386ac008d743",
+    "opportunity_id": "3f807a9f-42b4-4435-811c-bfb900e5d032",
+    "task": "2b2ab482-7ebb-4397-bade-6dd5099c269a"
+  }
+}

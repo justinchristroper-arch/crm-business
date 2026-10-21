@@ -27,7 +27,7 @@ Open the demo in a new tab; iframe embedding is blocked by frame protection.
 
 - Built and deployed a full-stack B2B CRM using vanilla JavaScript, FastAPI, SQLAlchemy, and Neon PostgreSQL with a same-origin Vercel deployment.
 - Implemented server-enforced role/ownership access, transactional lead conversion, Won/Lost/reopen rules, task follow-up, and PostgreSQL-protected application audit history.
-- Validated business rules with 29 PostgreSQL integration tests, 3 frontend tests, CI lint/build/migration checks, and 131 hosted acceptance checks.
+- Validated business rules with 42 PostgreSQL integration tests, 3 frontend tests, 2 Chromium E2E tests, CI lint/build/migration/advisory checks, 135 hosted acceptance checks, and 38 targeted hosted regressions.
 
 ## Three portfolio highlights
 
@@ -45,7 +45,7 @@ Choose **Sales Rep**, **Manager**, or **Admin** on the login screen, then submit
 
 ## Validation and limits
 
-29 backend tests, 3 frontend tests, ESLint, Ruff, asset build, dependency check, Alembic head/no drift, and 131 hosted checks passed. UI inspected at widths 1440, 1280, 768, and 390 px. [Detailed evidence](VERIFICATION.md).
+42 backend tests, 3 frontend tests, 2 Chromium E2E tests, ESLint, Ruff, asset build, dependency/advisory checks, Alembic head/no drift, 135 hosted acceptance checks and 38 hosted regression checks passed. UI inspected at widths 1440, 1280, 768, and 390 px, with desktop/mobile rechecked after hardening. [Latest evidence](HARDENING-VERIFICATION.md).
 
 This is a personal portfolio demo, not a real-company deployment. Shared accounts, public Admin powers over fake data, cold starts, Free/Hobby quotas, no MFA/SSO/email password recovery, no multi-tenant organization isolation, and no load test/SLA. Data and dashboard totals may change between visits. No measured revenue or business improvement is claimed.
 
