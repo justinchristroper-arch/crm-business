@@ -1,5 +1,7 @@
 # Public deployment verification
 
+**Latest application verification:** [audit fixes and free hardening](HARDENING-VERIFICATION.md) supersedes the earlier implementation record below: 42 backend tests, 3 frontend tests, 2 browser E2E tests, 135 hosted acceptance checks and 38 targeted hosted regressions. Application code `c5d599563d24ea1227abbfcf09dd27b957588a1c`; schema `0003_lead_details`.
+
 Finalization date: **21 October 2026 (Asia/Jakarta)**. Initial deployment/screenshots: 6 October 2026. Public URL: **https://crm-business-sigma.vercel.app**. Public repository: **https://github.com/justinchristroper-arch/crm-business**, branch `main`.
 
 Tested deployed application code: **8edcecb0d6dca485b15ea4f83d57eda6d8b21d46**. Subsequent publication changes contain documentation, evidence, and screenshots only. The final documentation commit can be found with `git log -1`; its own SHA is intentionally not embedded inside itself.
