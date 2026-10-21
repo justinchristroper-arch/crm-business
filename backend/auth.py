@@ -6,7 +6,8 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import Depends, HTTPException, Request
-from sqlalchemy import select, text
+from sqlalchemy import select, text, delete
+from backend.observability import security_event
 from sqlalchemy.orm import Session as DB
 from backend.config import settings
 from backend.db import get_db
@@ -37,6 +38,7 @@ def login(db, email, password, request):
     attempt = db.get(LoginAttempt, key)
     current = now()
     if attempt and attempt.blocked_until and attempt.blocked_until > current:
+        security_event('login_throttled', status=429)
         raise HTTPException(429, 'Terlalu banyak percobaan. Coba lagi setelah 15 menit.')
     user = db.scalar(select(User).where(User.email == email))
     valid = False
@@ -44,7 +46,7 @@ def login(db, email, password, request):
         valid = hasher.verify(user.password_hash if user else DUMMY_HASH, password)
     except (VerificationError, InvalidHashError):
         pass
-    if not user or not valid or not user.active:
+    if not user or not valid or not user.active or (user.demo and not settings().demo_mode):
         if not attempt:
             attempt = LoginAttempt(key=key, attempts=0)
             db.add(attempt)
@@ -54,11 +56,20 @@ def login(db, email, password, request):
         attempt.updated_at = current
         attempt.blocked_until = current + timedelta(minutes=15) if attempt.attempts >= 8 else None
         db.commit()
+        security_event('login_rejected', status=401)
         raise HTTPException(401, 'Email atau password salah.')
     if attempt:
         db.delete(attempt)
     if hasher.check_needs_rehash(user.password_hash):
         user.password_hash = hasher.hash(password)
+    lock_key(db, 'sessions:' + user.id)
+    # Bounded maintenance only affects this account; no public cron or paid scheduler.
+    db.execute(delete(Session).where(Session.user_id == user.id,
+                                    (Session.expires_at <= current) | Session.revoked))
+    sessions = list(db.scalars(select(Session).where(Session.user_id == user.id)
+                              .order_by(Session.expires_at.desc(), Session.id).offset(4)))
+    for old_session in sessions:
+        db.delete(old_session)
     session = Session(user_id=user.id, csrf=secrets.token_urlsafe(32), expires_at=current + timedelta(hours=8))
     db.add(session)
     db.flush()
@@ -66,6 +77,7 @@ def login(db, email, password, request):
                         'exp': session.expires_at, 'iss': 'crm-business', 'aud': 'crm-web'},
                        settings().jwt_secret, algorithm='HS256')
     db.commit()
+    security_event('login_succeeded', actor_id=user.id, role=user.role, status=200)
     return user, session, token
 
 
@@ -79,7 +91,7 @@ def current_user(request: Request, db: DB = Depends(get_db)):
         raise HTTPException(401, 'Silakan masuk kembali.') from None
     session = db.get(Session, claims['jti'])
     user = db.get(User, claims['sub'])
-    if not session or session.revoked or session.expires_at <= now() or not user or not user.active:
+    if not session or session.revoked or session.expires_at <= now() or not user or not user.active or (user.demo and not settings().demo_mode):
         raise HTTPException(401, 'Sesi tidak aktif.')
     if session.user_id != user.id:
         raise HTTPException(401, 'Sesi tidak valid.')

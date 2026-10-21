@@ -77,7 +77,7 @@ Owned records include UUID string ID, owner/assignee, created/updated UTC timest
 7. Canonical stages New/Qualification/Proposal/Negotiation/Won/Lost map to Indonesian UI labels. Direct transitions are allowed; no extra stage gating.
 8. Won/Lost sets closed_at, Lost requires nonblank reason. Same-stage saves retain close time. Changing one closed outcome to another updates close time and audit.
 9. Reopen clears closed_at/reason and records reopened plus stage_changed.
-10. Stage/value/ownership changes produce audit; Manager/Admin modifying another owner's outcome/value must explain the change.
+10. Stage/value/ownership/closing-reason changes produce audit; Manager/Admin outside owner/assignee modifying outcome/value/closing-reason must explain the change. Same-stage reason edits are audited; unchanged stage commands are no-ops.
 11. Opportunities cannot be deleted via CRUD: use Lost with reason. Converted leads are retained/read-only for history/analytics. FK-related contacts/companies cannot be deleted.
 12. Overdue = incomplete task due before today's report date; today is not overdue.
 13. At Risk = active opportunity with last opportunity follow-up (or created_at when none) at least configured days ago. Default 14, Admin can choose 1–365.
@@ -125,6 +125,10 @@ OpenAPI: `/api/docs`, `/api/openapi.json`.
 | /health | Minimal DB reachability |
 
 All authenticated writes require session cookie + X-CSRF-Token. Input forbids arbitrary extra fields; clients cannot choose IDs/closed dates/audit events. PUT expects complete resource and `?revision=n`. Ownership is a separate command.
+
+Collections: `/api/{resource}/page?offset=0&limit=50&q=...&status=...` returns `items`, `offset`, `limit`, `total`, `has_more`; max limit 100. Stable created-at/ID ordering and server scope apply before pagination/search. Legacy list endpoints return at most 100 records. `/workspace` accepts `view`, `offset`, `limit`, `q`, `status`; its collections are bounded, related lookup records are separate, and SQL analytics cover the entire authorized scope independently of the page. Explicit backup export remains full scoped data for demo-volume export.
+
+Lead phone/role fields persist through create/update, conversion to a new Contact, and backup import. Existing normalized Contacts reused by conversion are preserved. Assignment requires both owner and assignee access to necessary parent records and refuses parent-access revocation while dependent records still need it. No implicit access cascade is granted.
 
 ## Import/reset changes justified by multi-user migration
 

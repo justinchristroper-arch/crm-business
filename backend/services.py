@@ -3,7 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func, String
 from backend.models import Company, Contact, Lead, Opportunity, Task, User, Config, AuditEvent, now
 from backend.config import settings
 from backend.auth import lock_key
@@ -32,7 +32,46 @@ def scope(db, user, model):
 
 def visible(db, user, kind):
     model = MODELS[kind]
-    return list(db.scalars(select(model).where(scope(db, user, model)).order_by(model.created_at)))
+    rows = list(db.scalars(select(model).where(scope(db, user, model)).order_by(model.created_at, model.id)))
+    preload_companies(db, rows)
+    return rows
+
+
+def preload_companies(db, rows):
+    cache = db.info.setdefault('company_lookup', {})
+    ids = {r.company_id for r in rows if isinstance(r, (Contact, Opportunity))}.difference(cache)
+    if ids:
+        cache.update({r.id: r for r in db.scalars(select(Company).where(Company.id.in_(ids)))})
+
+
+def page_records(db, user, kind, offset=0, limit=50, query='', status=''):
+    model = MODELS[kind]
+    conditions = [scope(db, user, model)]
+    if query:
+        fields = [getattr(model, name) for name in ('name', 'title', 'email', 'company') if hasattr(model, name)]
+        escaped = query.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+        pattern = '%' + escaped + '%'
+        matches = [field.cast(String).ilike(pattern, escape='\\') for field in fields]
+        companies = select(Company.id).where(Company.name.ilike(pattern, escape='\\'))
+        if kind in ('contacts', 'opportunities'):
+            matches.append(model.company_id.in_(companies))
+        if kind in ('opportunities', 'tasks'):
+            contacts = select(Contact.id).where(or_(Contact.name.ilike(pattern, escape='\\'), Contact.company_id.in_(companies)))
+            matches.append(model.contact_id.in_(contacts))
+        conditions.append(or_(*matches))
+    if status and status != 'Semua':
+        if kind == 'opportunities':
+            reverse = {label: code for code, label in STAGE_LABELS.items()}
+            conditions.append(model.stage == reverse.get(status, status))
+        elif kind == 'leads':
+            conditions.append(model.status == status)
+        elif kind == 'tasks' and status in ('Aktif', 'Selesai'):
+            conditions.append(model.done == (status == 'Selesai'))
+    total = db.scalar(select(func.count()).select_from(model).where(*conditions))
+    rows = list(db.scalars(select(model).where(*conditions).order_by(model.created_at.desc(), model.id)
+                          .offset(offset).limit(limit)))
+    preload_companies(db, rows)
+    return rows, {'offset': offset, 'limit': limit, 'total': total, 'has_more': offset + len(rows) < total}
 
 
 def get_record(db, user, kind, id, revision=None, lock=False):
@@ -109,13 +148,42 @@ def duplicate_contact(db, owner, email, exclude=None):
     return db.scalar(query)
 
 
-def check_relation(db, actor, kind, id, owner):
+def check_relation(db, actor, kind, id, owner, assigned=None):
     if not id:
         return None
-    record = get_record(db, actor, kind, id)
-    if owner not in (record.owner_id, record.assigned_id):
-        raise HTTPException(422, 'Relasi harus dapat diakses pemilik record.')
+    record = get_record(db, actor, kind, id, lock=True)
+    if not {owner, assigned}.difference({None}).issubset({record.owner_id, record.assigned_id}):
+        raise HTTPException(422, 'Berikan akses relasi kepada owner dan assignee terlebih dahulu.')
     return record
+
+
+def validate_relations(db, actor, kind, values, owner, assigned=None):
+    if kind == 'contacts':
+        check_relation(db, actor, 'companies', values['company_id'], owner, assigned)
+    if kind == 'opportunities':
+        contact = check_relation(db, actor, 'contacts', values['contact_id'], owner, assigned)
+        check_relation(db, actor, 'companies', contact.company_id, owner, assigned)
+    if kind == 'leads' and values.get('converted_at'):
+        check_relation(db, actor, 'contacts', values['contact_id'], owner, assigned)
+        if values.get('opportunity_id'):
+            check_relation(db, actor, 'opportunities', values['opportunity_id'], owner, assigned)
+    if kind == 'tasks':
+        task_relations(db, actor, values, owner, assigned)
+
+
+def protect_dependants(db, kind, record, owner, assigned):
+    """Do not revoke a parent grant that a child still needs; never widen grants implicitly."""
+    relations = {
+        'companies': [(Contact, 'company_id'), (Opportunity, 'company_id')],
+        'contacts': [(Opportunity, 'contact_id'), (Task, 'contact_id'), (Lead, 'contact_id')],
+        'opportunities': [(Task, 'opportunity_id'), (Lead, 'opportunity_id')],
+        'leads': [(Task, 'lead_id')],
+    }
+    removed = {record.owner_id, record.assigned_id}.difference({owner, assigned, None})
+    for model, field in relations.get(kind, []):
+        if removed and db.scalar(select(model.id).where(getattr(model, field) == record.id,
+                or_(model.owner_id.in_(removed), model.assigned_id.in_(removed))).limit(1)):
+            raise HTTPException(409, 'Akses masih diperlukan record terkait. Ubah assignment record turunan dahulu.')
 
 
 def close_deal(record, stage, reason):
@@ -150,12 +218,9 @@ def create_record(db, actor, kind, payload):
         if duplicate_contact(db, owner, values['email']):
             raise HTTPException(409, 'Kontak dengan email tersebut sudah ada untuk pemilik ini.')
         values.update(company_id=company.id, normalized_email=values['email'].casefold() or None)
-    if kind == 'leads':
-        values.pop('phone', None)
-        values.pop('role', None)
     if kind == 'opportunities':
-        c = check_relation(db, actor, 'contacts', values['contact_id'], owner)
-        check_relation(db, actor, 'companies', c.company_id, owner)
+        c = check_relation(db, actor, 'contacts', values['contact_id'], owner, assigned)
+        check_relation(db, actor, 'companies', c.company_id, owner, assigned)
         values['company_id'] = c.company_id
         values.pop('change_reason')
         if values['stage'] == 'Lost' and not values['closing_reason'].strip():
@@ -164,7 +229,9 @@ def create_record(db, actor, kind, payload):
         if not values['closed_at']:
             values['closing_reason'] = ''
     if kind == 'tasks':
-        task_relations(db, actor, values, owner)
+        task_relations(db, actor, values, owner, assigned)
+    if kind == 'contacts':
+        validate_relations(db, actor, kind, values, owner, assigned)
     record = MODELS[kind](owner_id=owner, assigned_id=assigned, **values)
     db.add(record)
     db.flush()
@@ -174,9 +241,11 @@ def create_record(db, actor, kind, payload):
     return record
 
 
-def task_relations(db, actor, values, owner):
+def task_relations(db, actor, values, owner, assigned=None):
     for key, kind in [('contact_id', 'contacts'), ('lead_id', 'leads'), ('opportunity_id', 'opportunities')]:
-        check_relation(db, actor, kind, values.get(key), owner)
+        related = check_relation(db, actor, kind, values.get(key), owner, assigned)
+        if related and kind in ('contacts', 'opportunities'):
+            validate_relations(db, actor, kind, record_snapshot(related), owner, assigned)
     if values.get('opportunity_id') and values.get('contact_id'):
         deal = get_record(db, actor, 'opportunities', values['opportunity_id'])
         if deal.contact_id != values['contact_id']:
@@ -212,18 +281,18 @@ def update_record(db, actor, kind, id, payload, revision):
         if company.id != record.company_id and db.scalar(select(Opportunity.id).where(Opportunity.contact_id == id)):
             raise HTTPException(409, 'Kontak terkait deal tidak dapat dipindahkan perusahaan.')
         values.update(company_id=company.id, normalized_email=values['email'].casefold() or None)
-    if kind == 'leads':
-        values.pop('phone', None)
-        values.pop('role', None)
     if kind == 'opportunities':
         reason = values.pop('change_reason')
-        privileged_reason(actor, record, reason, record.stage != values['stage'] or record.value != values['value'])
-        c = check_relation(db, actor, 'contacts', values['contact_id'], record.owner_id)
-        check_relation(db, actor, 'companies', c.company_id, record.owner_id)
+        privileged_reason(actor, record, reason, record.stage != values['stage'] or record.value != values['value']
+                          or record.closing_reason != (values['closing_reason'].strip() if values['stage'] in ('Won', 'Lost') else ''))
+        c = check_relation(db, actor, 'contacts', values['contact_id'], record.owner_id, record.assigned_id)
+        check_relation(db, actor, 'companies', c.company_id, record.owner_id, record.assigned_id)
         values['company_id'] = c.company_id
         close_deal(record, values.pop('stage'), values.pop('closing_reason'))
     if kind == 'tasks':
-        task_relations(db, actor, values, record.owner_id)
+        task_relations(db, actor, values, record.owner_id, record.assigned_id)
+    if kind == 'contacts':
+        validate_relations(db, actor, kind, values, record.owner_id, record.assigned_id)
     for key, value in values.items():
         setattr(record, key, value)
     record.revision += 1
@@ -239,7 +308,8 @@ def update_record(db, actor, kind, id, payload, revision):
 
 
 def audit_deal_changes(db, actor, record, old, new, reason=''):
-    for field, action in [('stage', 'stage_changed'), ('value', 'value_changed')]:
+    for field, action in [('stage', 'stage_changed'), ('value', 'value_changed'),
+                          ('closing_reason', 'closing_reason_changed')]:
         changed = Decimal(old[field]) != Decimal(new[field]) if field == 'value' else old[field] != new[field]
         if changed:
             audit(db, actor, 'opportunities', record, action, {field: old[field]}, {field: new[field]},
@@ -250,7 +320,11 @@ def audit_deal_changes(db, actor, record, old, new, reason=''):
 
 def transition(db, actor, id, payload):
     record = get_record(db, actor, 'opportunities', id, payload.revision, lock=True)
-    privileged_reason(actor, record, payload.change_reason, record.stage != payload.stage)
+    effective_reason = payload.closing_reason.strip() if payload.stage in ('Won', 'Lost') else ''
+    changed = record.stage != payload.stage or record.closing_reason != effective_reason
+    privileged_reason(actor, record, payload.change_reason, changed)
+    if not changed:
+        return record
     old = record_snapshot(record)
     close_deal(record, payload.stage, payload.closing_reason)
     record.revision += 1
@@ -268,17 +342,8 @@ def change_owner(db, actor, kind, id, payload):
         raise HTTPException(422, 'Owner wajib diisi.')
     if kind in ('companies', 'contacts') and owner != record.owner_id:
         raise HTTPException(409, 'Pemilik perusahaan/kontak tetap; gunakan assignee untuk kolaborasi.')
-    if kind == 'contacts' and assigned:
-        company = db.get(Company, record.company_id)
-        if assigned not in (company.owner_id, company.assigned_id):
-            raise HTTPException(422, 'Berikan akses perusahaan kepada assignee terlebih dahulu.')
-    if kind == 'opportunities':
-        c = db.get(Contact, record.contact_id)
-        company = db.get(Company, record.company_id)
-        if owner not in (c.owner_id, c.assigned_id) or owner not in (company.owner_id, company.assigned_id):
-            raise HTTPException(422, 'Berikan akses kontak/perusahaan ke owner baru terlebih dahulu.')
-    if kind == 'tasks':
-        task_relations(db, actor, record_snapshot(record), owner)
+    validate_relations(db, actor, kind, record_snapshot(record), owner, assigned)
+    protect_dependants(db, kind, record, owner, assigned)
     old = {'owner_id': record.owner_id, 'assigned_id': record.assigned_id}
     record.owner_id, record.assigned_id = owner, assigned
     record.revision += 1
@@ -295,6 +360,7 @@ def convert(db, actor, id, payload):
     if payload.create_opportunity and (not payload.title or not payload.due):
         raise HTTPException(422, 'Judul dan target tanggal diperlukan untuk membuat deal.')
     company = resolve_company(db, actor, lead.company, lead.owner_id, lead.assigned_id)
+    check_relation(db, actor, 'companies', company.id, lead.owner_id, lead.assigned_id)
     contact = duplicate_contact(db, lead.owner_id, lead.email)
     if contact and contact.company_id != company.id:
         raise HTTPException(409, 'Email sudah terkait perusahaan lain. Periksa lead sebelum konversi.')
@@ -302,10 +368,12 @@ def convert(db, actor, id, payload):
         raise HTTPException(409, 'Kontak existing belum ditugaskan kepada Anda. Manager perlu memberi akses terlebih dahulu.')
     if not contact:
         contact = Contact(owner_id=lead.owner_id, assigned_id=lead.assigned_id, name=lead.name,
-                          company_id=company.id, email=lead.email, normalized_email=lead.email.casefold() or None)
+                          company_id=company.id, email=lead.email, normalized_email=lead.email.casefold() or None,
+                          phone=lead.phone, role=lead.role)
         db.add(contact)
         db.flush()
         audit(db, actor, 'contacts', contact, 'created', new=record_snapshot(contact))
+    check_relation(db, actor, 'contacts', contact.id, lead.owner_id, lead.assigned_id)
     opportunity = None
     if payload.create_opportunity:
         opportunity = Opportunity(owner_id=lead.owner_id, assigned_id=lead.assigned_id,
@@ -343,14 +411,21 @@ def serialize(db, record, risk_days=14):
     result = record_snapshot(record)
     result['created'] = record.created_at.astimezone(ZoneInfo(settings().report_timezone)).date().isoformat()
     if isinstance(record, Contact):
-        result['company'] = db.get(Company, record.company_id).name
+        result['company'] = company_name(db, record.company_id)
     if isinstance(record, Opportunity):
         result.update(contact=record.contact_id, stage=STAGE_LABELS[record.stage], stage_code=record.stage,
                       value=float(record.value), closed=record.closed_at.astimezone(ZoneInfo(settings().report_timezone)).date().isoformat() if record.closed_at else '',
-                      at_risk=at_risk(record, risk_days), company=db.get(Company, record.company_id).name)
+                      at_risk=at_risk(record, risk_days), company=company_name(db, record.company_id))
     if isinstance(record, Task):
         result.update(contact=record.contact_id or '', overdue=not record.done and record.date < today())
     return result
+
+
+def company_name(db, id):
+    cache = db.info.setdefault('company_lookup', {})
+    if id not in cache:
+        cache[id] = db.get(Company, id)
+    return cache[id].name
 
 
 def audit_list(db, user, limit=200):
@@ -370,44 +445,5 @@ def audit_list(db, user, limit=200):
 
 
 def dashboard(db, user, days):
-    deals = visible(db, user, 'opportunities')
-    leads = visible(db, user, 'leads')
-    tasks = visible(db, user, 'tasks')
-    contacts = visible(db, user, 'contacts')
-    conf = config(db)
-    start = today() - timedelta(days=days-1)
-    zone = ZoneInfo(settings().report_timezone)
-    closed = [d for d in deals if d.closed_at and start <= d.closed_at.astimezone(zone).date() <= today()]
-    won = [d for d in closed if d.stage == 'Won']
-    active = [d for d in deals if d.stage not in ('Won', 'Lost')]
-    def sum_values(rows):
-        return float(sum((d.value for d in rows), Decimal(0)))
-    denominator = len(closed)
-    eligible_leads = [lead for lead in leads if start <= lead.created_at.astimezone(zone).date() <= today()]
-    result = {'won': sum_values(won), 'wonCount': len(won), 'closedCount': denominator,
-              'pipeline': sum_values(active), 'activeCount': len(active),
-              'winRate': int(len(won)/denominator*100+0.5) if denominator else 0,
-              'contactCount': len(contacts), 'overdueTasks': sum(not t.done and t.date < today() for t in tasks),
-              'atRiskCount': sum(at_risk(d, conf.risk_days) for d in active),
-              'conversionRate': round(sum(lead.converted_at is not None for lead in eligible_leads)/len(eligible_leads)*100, 1) if eligible_leads else 0,
-              'averageSalesCycle': round(sum((d.closed_at-d.created_at).total_seconds()/86400 for d in won)/len(won), 1) if won else 0,
-              'stageValues': {STAGE_LABELS[s]: {'count': sum(d.stage == s for d in active),
-                                              'value': sum_values([d for d in active if d.stage == s])}
-                              for s in ['New', 'Qualification', 'Proposal', 'Negotiation']},
-              'sourceCounts': {s: sum(lead.source == s for lead in leads) for s in sorted({lead.source for lead in leads})},
-              'byRep': [], 'months': [], 'days': days, 'today': today().isoformat()}
-    # Six calendar months, including the current partial month.
-    month_no = today().year*12 + today().month-1
-    for n in range(month_no-5, month_no+1):
-        key = f'{n//12}-{n%12+1:02d}'
-        rows = [d for d in deals if d.stage == 'Won' and d.closed_at and d.closed_at.astimezone(zone).strftime('%Y-%m') == key]
-        result['months'].append({'month': key, 'value': sum_values(rows)})
-    if user.role in ('manager', 'admin'):
-        query = select(User).where(User.role == 'sales')
-        if user.role == 'manager':
-            query = query.where(User.team == user.team)
-        for rep in db.scalars(query):
-            result['byRep'].append({'id': rep.id, 'name': rep.name, 'pipeline': sum_values([d for d in active if d.owner_id == rep.id]),
-                                    'won': sum_values([d for d in won if d.owner_id == rep.id]),
-                                    'open': sum(d.owner_id == rep.id for d in active)})
-    return result
+    from backend.analytics import summary
+    return summary(db, user, days)

@@ -3,7 +3,8 @@ from fastapi import FastAPI, Depends, HTTPException, Request, Response, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session as DB
 from backend import schemas as S, services as svc
@@ -11,6 +12,7 @@ from backend.auth import current_user, admin_user, user_view, login, origin_chec
 from backend.config import settings
 from backend.db import get_db
 from backend.models import User, Session, AuditEvent, Config, now
+from backend.observability import install_observability, security_event
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -52,6 +54,11 @@ def create_app():
     @app.exception_handler(IntegrityError)
     async def conflict(request, exc):
         return JSONResponse({'detail': 'Konflik data: duplikat atau record masih terkait data lain.'}, 409)
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_input(request, exc):
+        errors = [{key: error[key] for key in ('loc', 'msg', 'type')} for error in exc.errors()]
+        return JSONResponse({'detail': errors}, status_code=422)
 
     @app.exception_handler(OperationalError)
     async def unavailable(request, exc):
@@ -108,6 +115,7 @@ def create_app():
         db.flush()
         user_audit(db, actor, target, 'user_created', new=user_view(target))
         db.commit()
+        security_event('user_created', actor_id=actor.id, role=actor.role, status=201)
         return user_view(target)
 
     @app.patch('/api/users/{id}')
@@ -129,6 +137,7 @@ def create_app():
             session.revoked = True
         user_audit(db, actor, target, 'user_updated', old, user_view(target))
         db.commit()
+        security_event('user_updated', actor_id=actor.id, role=actor.role, status=200)
         return user_view(target)
 
     @app.get('/api/config')
@@ -165,7 +174,11 @@ def create_app():
         return {'ok': True}
 
     @app.get('/api/workspace')
-    def workspace(days: int = Query(30, ge=1, le=365), user: User = Depends(current_user), db: DB = Depends(get_db)):
+    def workspace(days: int = Query(30, ge=1, le=365),
+                  view: str = Query('dashboard', pattern='^(dashboard|companies|contacts|leads|opportunities|tasks|reports|guide|settings|users)$'),
+                  offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100),
+                  q: str = Query('', max_length=200), status: str = Query('', max_length=40),
+                  user: User = Depends(current_user), db: DB = Depends(get_db)):
         # All reads use the same authenticated user and server-side visibility rules.
         c = svc.config(db)
         users = select(User)
@@ -176,8 +189,41 @@ def create_app():
         data = {'version': 2, 'workspace': c.workspace, 'risk_days': c.risk_days,
                 'user': user_view(user), 'users': [user_view(u) for u in db.scalars(users)],
                 'analytics': svc.dashboard(db, user, days), 'activities': svc.audit_list(db, user)}
+        data['pagination'] = {}
+        loaded = {}
         for kind in svc.MODELS:
-            data['deals' if kind == 'opportunities' else kind] = [svc.serialize(db, r, c.risk_days) for r in svc.visible(db, user, kind)]
+            key = 'deals' if kind == 'opportunities' else kind
+            rows, meta = svc.page_records(db, user, kind, offset if kind == view else 0,
+                                         limit if kind == view else 100, q if kind == view else '',
+                                         status if kind == view else '')
+            loaded[kind] = rows
+            data['pagination'][key] = meta
+            data[key] = [svc.serialize(db, r, c.risk_days) for r in rows]
+        from backend.models import Contact, Company, Lead, Opportunity
+        parent_deal_ids = {r.opportunity_id for kind in ('tasks', 'leads') for r in loaded[kind] if r.opportunity_id}
+        parent_lead_ids = {r.lead_id for r in loaded['tasks'] if r.lead_id}
+        parent_deals = list(db.scalars(select(Opportunity).where(svc.scope(db, user, Opportunity), Opportunity.id.in_(parent_deal_ids))))
+        parent_leads = list(db.scalars(select(Lead).where(svc.scope(db, user, Lead), Lead.id.in_(parent_lead_ids))))
+        svc.preload_companies(db, parent_deals)
+        contact_ids = {r.contact_id for kind in ('opportunities', 'tasks', 'leads') for r in loaded[kind] if r.contact_id}
+        contact_ids.update(r.contact_id for r in parent_deals)
+        contacts = list(db.scalars(select(Contact).where(svc.scope(db, user, Contact), Contact.id.in_(contact_ids))))
+        svc.preload_companies(db, contacts)
+        company_ids = {r.company_id for r in contacts}
+        companies = db.scalars(select(Company).where(svc.scope(db, user, Company), Company.id.in_(company_ids)))
+        data['lookups'] = {'contacts': [svc.serialize(db, r, c.risk_days) for r in contacts],
+                           'companies': [svc.serialize(db, r, c.risk_days) for r in companies],
+                           'leads': [svc.serialize(db, r, c.risk_days) for r in parent_leads],
+                           'deals': [svc.serialize(db, r, c.risk_days) for r in parent_deals]}
+        for model, field, collection, attribute in [
+                (Contact, Contact.company_id, 'companies', 'contact_count'),
+                (svc.Opportunity, svc.Opportunity.company_id, 'companies', 'opportunity_count'),
+                (svc.Opportunity, svc.Opportunity.contact_id, 'contacts', 'opportunity_count')]:
+            ids = [r['id'] for r in data[collection]]
+            counts = dict(db.execute(select(field, func.count()).where(svc.scope(db, user, model), field.in_(ids))
+                                     .group_by(field)).all())
+            for row in data[collection]:
+                row[attribute] = counts.get(row['id'], 0)
         return data
 
     @app.post('/api/leads/{id}/convert')
@@ -194,8 +240,15 @@ def create_app():
 
     # Typed resource routes: no user-supplied model/table names or arbitrary fields.
     def resource_routes(kind, schema):
+        def page(offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100),
+                 q: str = Query('', max_length=200), status: str = Query('', max_length=40),
+                 user: User = Depends(current_user), db: DB = Depends(get_db)):
+            rows, meta = svc.page_records(db, user, kind, offset, limit, q, status)
+            return {'items': [svc.serialize(db, r, svc.config(db).risk_days) for r in rows], **meta}
+
         def list_records(user: User = Depends(current_user), db: DB = Depends(get_db)):
-            return [svc.serialize(db, r, svc.config(db).risk_days) for r in svc.visible(db, user, kind)]
+            rows, _ = svc.page_records(db, user, kind, limit=100)
+            return [svc.serialize(db, r, svc.config(db).risk_days) for r in rows]
 
         def read_record(id: str, user: User = Depends(current_user), db: DB = Depends(get_db)):
             return svc.serialize(db, svc.get_record(db, user, kind, id), svc.config(db).risk_days)
@@ -226,6 +279,7 @@ def create_app():
             db.commit()
             return svc.serialize(db, record, svc.config(db).risk_days)
 
+        app.add_api_route('/api/' + kind + '/page', page, methods=['GET'], name=kind + '_page')
         create.__annotations__['payload'] = schema
         update.__annotations__['payload'] = schema
         for path, endpoint, methods, status in [('', list_records, ['GET'], 200), ('', create, ['POST'], 201),
@@ -274,6 +328,7 @@ def create_app():
         raise HTTPException(404, 'Endpoint API tidak ditemukan.')
 
     app.mount('/', StaticFiles(directory=ROOT/'dist'), name='frontend')
+    install_observability(app)
     return app
 
 

@@ -28,6 +28,7 @@ def import_records(db, actor, payload):
             count += 1
         for row in payload['leads']:
             values = {k: row[k] for k in ['name', 'company', 'email', 'source', 'status', 'notes']}
+            values.update(phone=row.get('phone', ''), role=row.get('role', ''))
             if values['status'] == 'Dikonversi':
                 values['status'] = 'Kualifikasi'
                 converted.append(row)

@@ -90,6 +90,8 @@ class Lead(Owned, Base):
     name: Mapped[str] = mapped_column(String(200))
     company: Mapped[str] = mapped_column(String(200))
     email: Mapped[str] = mapped_column(String(254), default='')
+    phone: Mapped[str] = mapped_column(String(80), default='', server_default='')
+    role: Mapped[str] = mapped_column(String(120), default='', server_default='')
     source: Mapped[str] = mapped_column(String(40), default='Website')
     status: Mapped[str] = mapped_column(String(30), default='Baru')
     notes: Mapped[str] = mapped_column(Text, default='')

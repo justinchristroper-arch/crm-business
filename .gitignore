@@ -9,6 +9,8 @@ __pycache__/
 .ruff_cache/
 .vercel/
 public/
+playwright-report/
+test-results/
 *.db
 *.db-*
 .env*

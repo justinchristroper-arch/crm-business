@@ -8,6 +8,8 @@ CRM B2B untuk belajar alur **Lead → Company + Contact → Opportunity → Won/
 
 **Verifikasi hosted:** 131 pemeriksaan API pada demo publik lulus, meliputi autentikasi, hak akses, konversi lead, task, Won/Lost/reopen, audit, persistensi, dan perhitungan analitik. Tampilan diperiksa pada lebar 1440, 1280, 768, dan 390 px. Lihat [bukti verifikasi](docs/VERIFICATION.md), [screenshot asli](docs/screenshots/README.md), dan [konten siap portfolio](docs/PORTFOLIO-HANDOFF.md).
 
+**Perbaikan audit:** riwayat perubahan alasan penutupan, konsistensi assignment, detail Lead, role database berizin minimum, agregasi SQL, pagination/pencarian server, request ID/logging, pembatasan sesi, dan tes browser otomatis. Baca [perbaikan gratis dan prosedur operasi](docs/FREE-HARDENING.md) untuk detail serta batasannya.
+
 ## Ringkasan portfolio
 
 **Masalah bisnis:** studio web fiktif membutuhkan satu tempat untuk memantau calon klien, peluang penjualan, dan follow-up beberapa sales rep, dengan aturan akses dan riwayat perubahan yang konsisten.
